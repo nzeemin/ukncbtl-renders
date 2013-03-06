@@ -1,0 +1,8 @@
+LIBRARY	"RenderOpenGL"
+
+EXPORTS
+	RenderInit
+	RenderDone
+	RenderEnumModes
+	RenderSelectMode
+	RenderDraw

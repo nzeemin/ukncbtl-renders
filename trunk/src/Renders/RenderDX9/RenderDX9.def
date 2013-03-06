@@ -1,0 +1,8 @@
+LIBRARY	"RenderDX9"
+
+EXPORTS
+	RenderInit
+	RenderDone
+	RenderEnumModes
+	RenderSelectMode
+	RenderDraw
