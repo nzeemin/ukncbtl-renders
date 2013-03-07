@@ -26,6 +26,7 @@ LRESULT CALLBACK	ScreenWndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 void DoCommandSelectRender(LPCTSTR renderDllName);
+void DoCommandTestFps();
 
 
 void AlertWarning(LPCTSTR sMessage)
@@ -315,6 +316,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case ID_RENDER_UNLOAD:
             DoCommandSelectRender(NULL);
             break;
+        case ID_RENDER_TESTFPS:
+            DoCommandTestFps();
+            break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -380,4 +384,45 @@ void DoCommandSelectRender(LPCTSTR renderDllName)
     }
 
     UpdateWindowTitle();
+}
+
+void DoCommandTestFps()
+{
+    if (RenderDrawProc == NULL) return;
+
+    HDC hdc = GetDC(g_hwndScreen);
+
+    SYSTEMTIME timeFrom;  ::GetLocalTime(&timeFrom);
+
+    const int frameCount = 500;
+
+    for (int i = 0; i < frameCount; i++)
+    {
+        RenderDrawProc(g_Screen, hdc);
+    }
+
+    SYSTEMTIME timeTo;  ::GetLocalTime(&timeTo);
+
+    ::ReleaseDC(g_hwndScreen, hdc);
+
+    FILETIME fileTimeTo;
+    SystemTimeToFileTime(&timeTo, &fileTimeTo);
+    ULARGE_INTEGER ulTimeTo;
+    ulTimeTo.LowPart = fileTimeTo.dwLowDateTime;
+    ulTimeTo.HighPart = fileTimeTo.dwHighDateTime;
+
+    FILETIME fileTimeFrom;
+    SystemTimeToFileTime(&timeFrom, &fileTimeFrom);
+    ULARGE_INTEGER ulTimeFrom;
+    ulTimeFrom.LowPart = fileTimeFrom.dwLowDateTime;
+    ulTimeFrom.HighPart = fileTimeFrom.dwHighDateTime;
+
+    ULONGLONG ulDiff = ulTimeTo.QuadPart - ulTimeFrom.QuadPart;
+
+    float diff = (float)ulDiff;  // number of 100-nanosecond intervals
+    TCHAR buffer[100];
+    swprintf(buffer, 100, _T("Time spent: %.3f seconds.\nFPS: %.2f"),
+        diff / 10000000.0f, frameCount / (diff / 10000000.0f));
+
+    AlertWarning(buffer);
 }
