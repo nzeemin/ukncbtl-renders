@@ -38,6 +38,8 @@ BOOL CALLBACK RenderInit(int width, int height, HWND hwndTarget)
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
     d3dpp.MultiSampleType = D3DMULTISAMPLE_2_SAMPLES;
     d3dpp.BackBufferCount = 1;
+    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+    d3dpp.hDeviceWindow = g_hwndScreen;
     
     HRESULT hr = g_pD3D->CreateDevice(
         D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, g_hwndScreen, D3DCREATE_HARDWARE_VERTEXPROCESSING,
@@ -115,14 +117,12 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
     srcRect.left = srcRect.top = 0;
     srcRect.right = g_SourceWidth;  srcRect.bottom = g_SourceHeight;
     ::GetClientRect(g_hwndScreen, &destRect);
-    //destRect.left = destRect.top = 0;
-    //destRect.right = 650;  destRect.bottom = 500;
     hr = g_direct3dDevice->StretchRect(g_D3DSurface, &srcRect, backbuffer, NULL,
         D3DTEXF_LINEAR);
 
     g_direct3dDevice->EndScene();
 
-    g_direct3dDevice->Present( NULL, NULL, NULL, NULL );
+    g_direct3dDevice->Present(NULL, NULL, NULL, NULL);
 }
 
 

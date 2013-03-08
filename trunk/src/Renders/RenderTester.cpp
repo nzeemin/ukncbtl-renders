@@ -31,7 +31,7 @@ void DoCommandTestFps();
 
 void AlertWarning(LPCTSTR sMessage)
 {
-    ::MessageBox(NULL, sMessage, szTitle, MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(g_hWnd, sMessage, szTitle, MB_OK | MB_ICONEXCLAMATION);
 }
 void AlertWarningFormat(LPCTSTR sFormat, ...)
 {
@@ -42,7 +42,7 @@ void AlertWarningFormat(LPCTSTR sFormat, ...)
     _vsntprintf_s(buffer, 512, 512 - 1, sFormat, ptr);
     va_end(ptr);
 
-    ::MessageBox(NULL, buffer, szTitle, MB_OK | MB_ICONEXCLAMATION);
+    ::MessageBox(g_hWnd, buffer, szTitle, MB_OK | MB_ICONEXCLAMATION);
 }
 
 RENDER_INIT_CALLBACK RenderInitProc = NULL;

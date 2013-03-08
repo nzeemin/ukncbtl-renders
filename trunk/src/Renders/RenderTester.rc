@@ -43,9 +43,9 @@ BEGIN
         MENUITEM "DirectX 9",                   ID_RENDER_DX9
         MENUITEM "OpenGL",                      ID_RENDER_OPENGL
         MENUITEM SEPARATOR
-        MENUITEM "Test FPS",                    ID_RENDER_TESTFPS
         MENUITEM "Unload",                      ID_RENDER_UNLOAD
     END
+    MENUITEM "Test FPS!",                   ID_RENDER_TESTFPS
     MENUITEM "Mode",                        0
 END
 
