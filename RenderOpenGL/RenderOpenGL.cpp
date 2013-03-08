@@ -12,7 +12,8 @@ int g_SourceHeight = 0;
 
 HGLRC g_hRC = NULL;
 
-DWORD * g_TextureBuffer = NULL;
+
+void SetVSync(bool sync);
 
 
 BOOL CALLBACK RenderSelectMode(int newMode)
@@ -49,15 +50,15 @@ BOOL CALLBACK RenderInit(int width, int height, HWND hwndTarget)
     
     g_hRC = wglCreateContext(hdc);
 
+    wglMakeCurrent(hdc, g_hRC);
+    SetVSync(0);
+    glEnable(GL_TEXTURE_2D);
     wglMakeCurrent(NULL, NULL);
 
     ::ReleaseDC(g_hwndScreen, hdc);
 
     if (g_hRC == NULL)
         return FALSE;
-
-    g_TextureBuffer = (DWORD*) ::malloc(1024 * 512 * 4);
-    ::memset(g_TextureBuffer, 0, 1024 * 512 * 4);
 
     RenderSelectMode(1);  // Select the default mode
 
@@ -73,12 +74,6 @@ void CALLBACK RenderDone()
         wglDeleteContext(g_hRC);
         g_hRC = NULL;
     }
-
-    if (g_TextureBuffer != NULL)
-    {
-        ::free(g_TextureBuffer);
-        g_TextureBuffer = NULL;
-    }
 }
 
 BOOL CALLBACK RenderEnumModes()
@@ -90,60 +85,80 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
 {
     if (pixels == NULL) return;
 
-    for (int line = 0; line < g_SourceHeight; line++)
-    {
-        DWORD* pSrc = ((DWORD*)pixels) + g_SourceWidth * line;
-        DWORD* pDest = g_TextureBuffer + 1024 * (line + (512 - 288) / 2) + (1024 - 640) / 2;
-        ::memcpy(pDest, pSrc, g_SourceWidth * 4);
-    }
-
-    RECT rc;  ::GetClientRect(g_hwndScreen, &rc);
-
     wglMakeCurrent(hdc, g_hRC);
     
+    RECT rc;  ::GetClientRect(g_hwndScreen, &rc);
     glViewport(0, 0, rc.right, rc.bottom);
+    
+    bool okOne2One = (rc.right == g_SourceWidth && rc.bottom == g_SourceHeight);
+    GLuint texture = 0;
+    if (okOne2One)  // 1:1 mode using glDrawPixels
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, rc.right, rc.bottom, 0, 1.0, 1.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    //glTranslatef(0.0f,0.0f,-5.0f);
+        //glShadeModel(GL_SMOOTH);
+        glRasterPos2i(-1, 1);
+        glPixelZoom(1.0f, -1.0);
+        glDrawPixels(g_SourceWidth, g_SourceHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+    }
+    else  // Free scale mode using texture on quad
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, rc.right, rc.bottom, 0, 1.0, 1.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, 1024, 512, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+        glTexSubImage2D(GL_TEXTURE_2D, 0,
+            (1024 - g_SourceWidth) / 2, (512 - g_SourceHeight) / 2, g_SourceWidth, g_SourceHeight,
+            GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        float dx = 1024 / ((float)g_SourceWidth);
+        float dy = 512 / ((float)g_SourceHeight);
+        glBegin(GL_QUADS);
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(-dx, -dy,  1.0f);  // Bottom Left Of The Texture and Quad
+            glTexCoord2f(1.0f, 1.0f); glVertex3f( dx, -dy,  1.0f);  // Bottom Right Of The Texture and Quad
+            glTexCoord2f(1.0f, 0.0f); glVertex3f( dx,  dy,  1.0f);  // Top Right Of The Texture and Quad
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(-dx,  dy,  1.0f);
+        glEnd();
+    }
 
     //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     //glClear(GL_COLOR_BUFFER_BIT);
 
-    //glShadeModel(GL_SMOOTH);
-    //glRasterPos2i(0, 0);
-    //glPixelZoom(1.5f, -1.5);
-
-    //glDrawPixels(640, 288, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
-
-    glEnable(GL_TEXTURE_2D);
-    GLuint texture = 0;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, 1024, 512, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, g_TextureBuffer);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    float dx = 1024 / ((float)g_SourceWidth);
-    float dy = 512 / ((float)g_SourceHeight);
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-dx, -dy,  1.0f);  // Bottom Left Of The Texture and Quad
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( dx, -dy,  1.0f);  // Bottom Right Of The Texture and Quad
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( dx,  dy,  1.0f);  // Top Right Of The Texture and Quad
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-dx,  dy,  1.0f);
-    glEnd();
-
     glFlush();
     SwapBuffers(hdc);
 
-    glDeleteTextures(1, &texture);
+    if (!okOne2One)
+        glDeleteTextures(1, &texture);
 
     wglMakeCurrent(NULL, NULL);
 }
 
+// Enable or disable VBlank sync for OpenGL
+void SetVSync(bool sync)
+{	
+	// Function pointer for the wgl extention function we need to enable/disable vsync
+	typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALPROC)( int );
+	PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
+
+	const char *extensions = (const char*) glGetString(GL_EXTENSIONS);
+	if (strstr(extensions, "WGL_EXT_swap_control") == 0)
+		return;
+
+    wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
+	if (wglSwapIntervalEXT)
+		wglSwapIntervalEXT(sync);
+}
 
 //////////////////////////////////////////////////////////////////////
 
