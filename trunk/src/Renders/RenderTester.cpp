@@ -26,7 +26,9 @@ LRESULT CALLBACK	ScreenWndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 void DoCommandSelectRender(LPCTSTR renderDllName);
+void DoCommandResize(int width, int height);
 void DoCommandTestFps();
+void DoCommandSelectMode(int mode);
 
 
 void AlertWarning(LPCTSTR sMessage)
@@ -48,6 +50,8 @@ void AlertWarningFormat(LPCTSTR sFormat, ...)
 RENDER_INIT_CALLBACK RenderInitProc = NULL;
 RENDER_DONE_CALLBACK RenderDoneProc = NULL;
 RENDER_DRAW_CALLBACK RenderDrawProc = NULL;
+RENDER_ENUM_MODES_CALLBACK RenderEnumModesProc = NULL;
+RENDER_SELECT_MODE_CALLBACK RenderSelectModeProc = NULL;
 
 void CreateScreen()
 {
@@ -61,6 +65,32 @@ void DestroyScreen()
 {
     ::DestroyWindow(g_hwndScreen);
     g_hwndScreen = (HWND) INVALID_HANDLE_VALUE;
+}
+
+struct ScreenModeStruct
+{
+    int modeNum;
+    int width;
+    int height;
+    TCHAR description[40];
+}
+static ScreenModeReference[20];
+
+static HMENU g_hModeMenu = NULL;
+static int g_nModeIndex = 0;
+
+void CALLBACK EnumModesProc(int modeNum, LPCTSTR modeDesc, int modeWidth, int modeHeight)
+{
+    if (g_nModeIndex >= 20)
+        return;
+
+    ScreenModeStruct* pmode = ScreenModeReference + g_nModeIndex;
+    pmode->modeNum = modeNum;
+    pmode->width = modeWidth;
+    pmode->height = modeHeight;
+    wcscpy_s(pmode->description, 40, modeDesc);
+
+    g_nModeIndex++;
 }
 
 BOOL InitRender(LPCTSTR szRenderLibraryName)
@@ -91,6 +121,36 @@ BOOL InitRender(LPCTSTR szRenderLibraryName)
         AlertWarningFormat(_T("Failed to retrieve RenderDraw address (0x%08lx)."), ::GetLastError());
         return FALSE;
     }
+    RenderEnumModesProc = (RENDER_ENUM_MODES_CALLBACK) ::GetProcAddress(g_hModuleRender, "RenderEnumModes");
+    if (RenderEnumModesProc == NULL)
+    {
+        AlertWarningFormat(_T("Failed to retrieve RenderEnumModes address (0x%08lx)."), ::GetLastError());
+        return FALSE;
+    }
+    RenderSelectModeProc = (RENDER_SELECT_MODE_CALLBACK) ::GetProcAddress(g_hModuleRender, "RenderSelectMode");
+    if (RenderSelectModeProc == NULL)
+    {
+        AlertWarningFormat(_T("Failed to retrieve RenderSelectMode address (0x%08lx)."), ::GetLastError());
+        return FALSE;
+    }
+
+    // Enumerate render modes
+    memset(ScreenModeReference, 0, sizeof(ScreenModeReference));
+    g_nModeIndex = 0;
+    RenderEnumModesProc(EnumModesProc);
+    g_hModeMenu = NULL;
+    // Fill Mode menu
+    HMENU hMainMenu = ::GetMenu(g_hWnd);
+    g_hModeMenu = ::CreatePopupMenu();
+    ::AppendMenu(hMainMenu, MF_STRING | MF_POPUP | MF_ENABLED, (UINT_PTR)g_hModeMenu, _T("Mode"));
+    for (int i = 0; i < 20; i++)
+    {
+        ScreenModeStruct* pmode = ScreenModeReference + i;
+        if (pmode->modeNum == 0)
+            break;
+        ::AppendMenu(g_hModeMenu, MF_STRING | MF_POPUP | MF_ENABLED, (UINT_PTR)(ID_RENDER_MODE + i), pmode->description);
+    }
+    ::DrawMenuBar(g_hWnd);
 
     CreateScreen();
     
@@ -114,12 +174,19 @@ void DoneRender()
         RenderInitProc = NULL;
         RenderDoneProc = NULL;
         RenderDrawProc = NULL;
+        RenderEnumModesProc = NULL;
 
         ::FreeLibrary(g_hModuleRender);
         g_hModuleRender = NULL;
 
         DestroyScreen();
     }
+
+    // Clear the Mode menu
+    HMENU hMainMenu = ::GetMenu(g_hWnd);
+    ::DeleteMenu(hMainMenu, 3, MF_BYPOSITION);
+    ::DestroyMenu(g_hModeMenu);  g_hModeMenu = NULL;
+    ::DrawMenuBar(g_hWnd);
 }
 
 void UpdateWindowTitle()
@@ -287,22 +354,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DestroyWindow(hWnd);
 			break;
         case ID_FILE_RESIZE1:
-            {
-                int cx = ::GetSystemMetrics(SM_CXFRAME) * 2 + 640;
-                int cy = ::GetSystemMetrics(SM_CYFRAME) * 2 + 288 + ::GetSystemMetrics(SM_CYMENU) + ::GetSystemMetrics(SM_CYCAPTION);
-                ::SetWindowPos(g_hWnd, NULL, 0,0, cx, cy, SWP_NOMOVE | SWP_NOZORDER);
-
-                UpdateWindowTitle();
-            }
+            DoCommandResize(640, 288);
             break;
         case ID_FILE_RESIZE2:
-            {
-                int cx = ::GetSystemMetrics(SM_CXFRAME) * 2 + (640 + 320);
-                int cy = ::GetSystemMetrics(SM_CYFRAME) * 2 + 288 * 2 + ::GetSystemMetrics(SM_CYMENU) + ::GetSystemMetrics(SM_CYCAPTION);
-                ::SetWindowPos(g_hWnd, NULL, 0,0, cx, cy, SWP_NOMOVE | SWP_NOZORDER);
-
-                UpdateWindowTitle();
-            }
+            DoCommandResize(640 + 320, 288 * 2);
             break;
         case ID_RENDER_VFW:
             DoCommandSelectRender(_T("RenderVfw.dll"));
@@ -320,7 +375,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DoCommandTestFps();
             break;
 		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+            if (wmId >= ID_RENDER_MODE && wmId < ID_RENDER_MODE + 20)
+                DoCommandSelectMode(wmId - ID_RENDER_MODE);
+			else
+                return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
 	case WM_DESTROY:
@@ -386,6 +444,15 @@ void DoCommandSelectRender(LPCTSTR renderDllName)
     UpdateWindowTitle();
 }
 
+void DoCommandResize(int width, int height)
+{
+    int cx = ::GetSystemMetrics(SM_CXFRAME) * 2 + width;
+    int cy = ::GetSystemMetrics(SM_CYFRAME) * 2 + height + ::GetSystemMetrics(SM_CYMENU) + ::GetSystemMetrics(SM_CYCAPTION);
+    ::SetWindowPos(g_hWnd, NULL, 0,0, cx, cy, SWP_NOMOVE | SWP_NOZORDER);
+
+    UpdateWindowTitle();
+}
+
 void DoCommandTestFps()
 {
     if (RenderDrawProc == NULL) return;
@@ -425,4 +492,18 @@ void DoCommandTestFps()
         diff / 10000000.0f, frameCount / (diff / 10000000.0f));
 
     AlertWarning(buffer);
+}
+
+void DoCommandSelectMode(int mode)
+{
+    if (RenderSelectModeProc == NULL)
+        return;
+
+    ScreenModeStruct* pmode = ScreenModeReference + mode;
+    RenderSelectModeProc(pmode->modeNum);
+
+    if (pmode->width > 0 && pmode->height > 0)
+        DoCommandResize(pmode->width, pmode->height);
+
+    ::InvalidateRect(g_hwndScreen, NULL, TRUE);
 }

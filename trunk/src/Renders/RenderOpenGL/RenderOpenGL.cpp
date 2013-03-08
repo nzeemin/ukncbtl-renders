@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <gl\gl.h>
 
+/// \brief Definition for render mode enumeration procedure.
+typedef void (CALLBACK* RENDER_MODE_ENUM_PROC)(int modeNum, LPCTSTR modeDesc, int modeWidth, int modeHeight);
+
 HWND g_hwndScreen = (HWND) INVALID_HANDLE_VALUE;
 
 int g_SourceWidth = 0;
@@ -15,6 +18,11 @@ HGLRC g_hRC = NULL;
 
 void SetVSync(bool sync);
 
+
+void CALLBACK RenderEnumModes(RENDER_MODE_ENUM_PROC enumProc)
+{
+    enumProc(1, _T("Free Scale Mode"), -1, -1);
+}
 
 BOOL CALLBACK RenderSelectMode(int newMode)
 {
@@ -38,10 +46,10 @@ BOOL CALLBACK RenderInit(int width, int height, HWND hwndTarget)
     ::memset(&pfd, 0, sizeof(pfd));
     pfd.nSize = sizeof(pfd);
     pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_DEPTH_DONTCARE;
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 24;
-    pfd.cDepthBits = 16;
+    pfd.cDepthBits = 0;
     pfd.iLayerType = PFD_MAIN_PLANE;
     int iFormat = ChoosePixelFormat(hdc, &pfd);
     int iOldFormat = ::GetPixelFormat(hdc);
@@ -74,11 +82,6 @@ void CALLBACK RenderDone()
         wglDeleteContext(g_hRC);
         g_hRC = NULL;
     }
-}
-
-BOOL CALLBACK RenderEnumModes()
-{
-    return FALSE;
 }
 
 void CALLBACK RenderDraw(const void * pixels, HDC hdc)

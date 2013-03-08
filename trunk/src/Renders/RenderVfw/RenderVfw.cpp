@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include <vfw.h>
 
+/// \brief Definition for render mode enumeration procedure.
+typedef void (CALLBACK* RENDER_MODE_ENUM_PROC)(int modeNum, LPCTSTR modeDesc, int modeWidth, int modeHeight);
+
 HWND g_hwndScreen = (HWND) INVALID_HANDLE_VALUE;
 
 int g_SourceWidth = 0;
@@ -34,14 +37,15 @@ struct ScreenModeStruct
     int width;
     int height;
     PREPARE_SCREEN_CALLBACK callback;
+    LPCTSTR description;
 }
 static ScreenModeReference[] = {
-    {  640,  288, PrepareScreenCopy },  // Dummy record for absent mode 0
-    {  640,  288, PrepareScreenCopy },
-    {  640,  576, PrepareScreenUpscale2 },
-    {  640,  432, PrepareScreenUpscale },
-    {  960,  576, PrepareScreenUpscale3 },
-    { 1280,  864, PrepareScreenUpscale4 },
+    {  640,  288, PrepareScreenCopy,     NULL },  // Dummy record for absent mode 0
+    {  640,  288, PrepareScreenCopy,     _T("Normal Height") },
+    {  640,  576, PrepareScreenUpscale2, _T("Double Intrlaced") },
+    {  640,  432, PrepareScreenUpscale,  _T("Upscaled to 1.5") },
+    {  960,  576, PrepareScreenUpscale3, _T("Interlaced Upscaled") },
+    { 1280,  864, PrepareScreenUpscale4, _T("Screen Mode 5") },
 };
 
 void RenderGetScreenSize(int scrmode, int* pwid, int* phei)
@@ -87,6 +91,15 @@ void RenderCreateDisplay()
     ReleaseDC( g_hwndScreen, hdc );
 }
 
+void CALLBACK RenderEnumModes(RENDER_MODE_ENUM_PROC enumProc)
+{
+    for (int i = 1; i < sizeof(ScreenModeReference) / sizeof(ScreenModeStruct); i++)
+    {
+        ScreenModeStruct* pinfo = ScreenModeReference + i;
+        enumProc(i, pinfo->description, pinfo->width, pinfo->height);
+    }
+}
+
 BOOL CALLBACK RenderSelectMode(int newMode)
 {
     if (m_ScreenHeightMode == newMode) return TRUE;
@@ -125,11 +138,6 @@ void CALLBACK RenderDone()
     }
 
     DrawDibClose( m_hdd );
-}
-
-BOOL CALLBACK RenderEnumModes()
-{
-    return FALSE;
 }
 
 void CALLBACK RenderDraw(const void * pixels, HDC hdc)
