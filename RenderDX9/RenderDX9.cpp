@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include <d3d9.h>
 
+/// \brief Definition for render mode enumeration procedure.
+typedef void (CALLBACK* RENDER_MODE_ENUM_PROC)(int modeNum, LPCTSTR modeDesc, int modeWidth, int modeHeight);
+
 HWND g_hwndScreen = (HWND) INVALID_HANDLE_VALUE;
 
 int g_SourceWidth = 0;
@@ -13,6 +16,11 @@ LPDIRECT3D9 g_pD3D = NULL;
 LPDIRECT3DDEVICE9 g_direct3dDevice = NULL;
 LPDIRECT3DSURFACE9 g_D3DSurface = NULL;
 
+
+void CALLBACK RenderEnumModes(RENDER_MODE_ENUM_PROC enumProc)
+{
+    enumProc(1, _T("Free Scale Mode"), -1, -1);
+}
 
 BOOL CALLBACK RenderSelectMode(int newMode)
 {
@@ -78,11 +86,6 @@ void CALLBACK RenderDone()
     }
 
     //TODO: Finalize
-}
-
-BOOL CALLBACK RenderEnumModes()
-{
-    return FALSE;
 }
 
 void CALLBACK RenderDraw(const void * pixels, HDC hdc)

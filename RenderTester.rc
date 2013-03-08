@@ -46,7 +46,6 @@ BEGIN
         MENUITEM "Unload",                      ID_RENDER_UNLOAD
     END
     MENUITEM "Test FPS!",                   ID_RENDER_TESTFPS
-    MENUITEM "Mode",                        0
 END
 
 
