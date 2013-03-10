@@ -2,8 +2,9 @@
 //
 
 #include "stdafx.h"
-#include "RenderTester.h"
+#include <crtdbg.h>
 #include <stdio.h>
+#include "RenderTester.h"
 
 #define MAX_LOADSTRING 100
 
@@ -175,6 +176,7 @@ void DoneRender()
         RenderDoneProc = NULL;
         RenderDrawProc = NULL;
         RenderEnumModesProc = NULL;
+        RenderSelectModeProc = NULL;
 
         ::FreeLibrary(g_hModuleRender);
         g_hModuleRender = NULL;
@@ -206,7 +208,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
- 	// TODO: Place code here.
+#ifdef _DEBUG
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF);
+    int n = 0;
+    _CrtSetBreakAlloc(n);
+#endif
+
 	MSG msg;
 	HACCEL hAccelTable;
 
@@ -234,9 +241,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     DoneRender();
 
+    ::free(g_Screen);
+
+#ifdef _DEBUG
+        if (_CrtDumpMemoryLeaks())
+            ::MessageBeep(MB_ICONEXCLAMATION);
+#endif
+
 	return (int) msg.wParam;
 }
-
 
 
 //
