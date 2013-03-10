@@ -29,6 +29,7 @@ void CALLBACK PrepareScreenUpscale(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale2(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale3(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale4(const void * pSrcBits, void * pDestBits);
+void CALLBACK PrepareScreenUpscale5(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreen_hq2x_32(const void * pSrcBits, void * pDestBits);
 
 //Прототип функции преобразования экрана
@@ -47,7 +48,8 @@ static ScreenModeReference[] = {
     {  640,  576, PrepareScreenUpscale2, _T("Double Intrlaced") },
     {  640,  432, PrepareScreenUpscale,  _T("Upscaled to 1.5") },
     {  960,  576, PrepareScreenUpscale3, _T("Interlaced Upscaled") },
-    { 1280,  864, PrepareScreenUpscale4, _T("Screen Mode 5") },
+    {  960,  720, PrepareScreenUpscale4, _T("960 x 720, 4:3") },
+    { 1280,  864, PrepareScreenUpscale5, _T("Screen Mode 5") },
     { 1280,  576, PrepareScreen_hq2x_32, _T("hq2x_32") },
 };
 
@@ -107,12 +109,12 @@ BOOL CALLBACK RenderSelectMode(int newMode)
 {
     if (m_ScreenHeightMode == newMode) return TRUE;
 
-    if (m_ScreenHeightMode == 6/*hqx*/)
+    if (m_ScreenHeightMode == 7/*hqx*/)
         hqxDone();
 
     m_ScreenHeightMode = newMode;
 
-    if (m_ScreenHeightMode == 6/*hqx*/)
+    if (m_ScreenHeightMode == 7/*hqx*/)
         hqxInit();
 
     RenderCreateDisplay();
@@ -242,6 +244,36 @@ void CALLBACK PrepareScreenUpscale2(const void * pSrcBits, void * pDestBits)
     }
 }
 
+// Upscale screen width 640->960, height 288->720
+void CALLBACK PrepareScreenUpscale4(const void * pSrcBits, void * pDestBits)
+{
+    for (int ukncline = 0; ukncline < g_SourceHeight; ukncline += 2)
+    {
+        DWORD* psrc1 = ((DWORD*)pSrcBits) + (g_SourceHeight - ukncline - 1) * g_SourceWidth;
+        DWORD* psrc2 = psrc1 - g_SourceWidth;
+        DWORD* pdest0 = ((DWORD*)pDestBits) + ukncline / 2 * 5 * 960;
+        DWORD* pdest1 = pdest0 + 960;
+        DWORD* pdest2 = pdest1 + 960;
+        DWORD* pdest3 = pdest2 + 960;
+        DWORD* pdest4 = pdest3 + 960;
+        for (int i = 0; i < g_SourceWidth / 2; i++)
+        {
+            DWORD c1a = *(psrc1++);  DWORD c1b = *(psrc1++);
+            DWORD c2a = *(psrc2++);  DWORD c2b = *(psrc2++);
+            DWORD c1 = AVERAGERGB(c1a, c1b);
+            DWORD c2 = AVERAGERGB(c2a, c2b);
+            DWORD ca = AVERAGERGB(c1a, c2a);
+            DWORD cb = AVERAGERGB(c1b, c2b);
+            DWORD c  = AVERAGERGB(ca,  cb);
+            (*pdest0++) = c1a;  (*pdest0++) = c1;  (*pdest0++) = c1b;
+            (*pdest1++) = c1a;  (*pdest1++) = c1;  (*pdest1++) = c1b;
+            (*pdest2++) = ca;   (*pdest2++) = c;   (*pdest2++) = cb;
+            (*pdest3++) = c2a;  (*pdest3++) = c2;  (*pdest3++) = c2b;
+            (*pdest4++) = c2a;  (*pdest4++) = c2;  (*pdest4++) = c2b;
+        }
+    }
+}
+
 // Upscale screen width 640->960, height 288->576 with "interlaced" effect
 void CALLBACK PrepareScreenUpscale3(const void * pSrcBits, void * pDestBits)
 {
@@ -267,7 +299,7 @@ void CALLBACK PrepareScreenUpscale3(const void * pSrcBits, void * pDestBits)
 }
 
 // Upscale screen width 640->1280, height 288->864 with "interlaced" effect
-void CALLBACK PrepareScreenUpscale4(const void * pSrcBits, void * pDestBits)
+void CALLBACK PrepareScreenUpscale5(const void * pSrcBits, void * pDestBits)
 {
     for (int ukncline = g_SourceHeight - 1; ukncline >= 0; ukncline--)
     {
