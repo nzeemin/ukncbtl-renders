@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include <vfw.h>
-#include "hqx\\hqx.h"
 
 /// \brief Definition for render mode enumeration procedure.
 typedef void (CALLBACK* RENDER_MODE_ENUM_PROC)(int modeNum, LPCTSTR modeDesc, int modeWidth, int modeHeight);
@@ -30,7 +29,6 @@ void CALLBACK PrepareScreenUpscale2(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale3(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale4(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale5(const void * pSrcBits, void * pDestBits);
-void CALLBACK PrepareScreen_hq2x_32(const void * pSrcBits, void * pDestBits);
 
 //Прототип функции преобразования экрана
 typedef void (CALLBACK* PREPARE_SCREEN_CALLBACK)(const void * pSrcBits, void * pDestBits);
@@ -44,13 +42,12 @@ struct ScreenModeStruct
 }
 static ScreenModeReference[] = {
     {  640,  288, PrepareScreenCopy,     NULL },  // Dummy record for absent mode 0
-    {  640,  288, PrepareScreenCopy,     _T("Normal Height") },
-    {  640,  576, PrepareScreenUpscale2, _T("Double Intrlaced") },
+    {  640,  288, PrepareScreenCopy,     _T("640 x 288 Standard") },
+    {  640,  576, PrepareScreenUpscale2, _T("640 x 576 Intrlaced") },
     {  640,  432, PrepareScreenUpscale,  _T("Upscaled to 1.5") },
-    {  960,  576, PrepareScreenUpscale3, _T("Interlaced Upscaled") },
+    {  960,  576, PrepareScreenUpscale3, _T("960 x 576 Interlaced") },
     {  960,  720, PrepareScreenUpscale4, _T("960 x 720, 4:3") },
     { 1280,  864, PrepareScreenUpscale5, _T("Screen Mode 5") },
-    { 1280,  576, PrepareScreen_hq2x_32, _T("hq2x_32") },
 };
 
 void RenderGetScreenSize(int scrmode, int* pwid, int* phei)
@@ -109,13 +106,7 @@ BOOL CALLBACK RenderSelectMode(int newMode)
 {
     if (m_ScreenHeightMode == newMode) return TRUE;
 
-    if (m_ScreenHeightMode == 7/*hqx*/)
-        hqxDone();
-
     m_ScreenHeightMode = newMode;
-
-    if (m_ScreenHeightMode == 7/*hqx*/)
-        hqxInit();
 
     RenderCreateDisplay();
 
@@ -142,9 +133,6 @@ BOOL CALLBACK RenderInit(int width, int height, HWND hwndTarget)
 
 void CALLBACK RenderDone()
 {
-    if (m_ScreenHeightMode == 6/*hqx*/)
-        hqxDone();
-
     if (m_hbmp != NULL)
     {
         DeleteObject(m_hbmp);
@@ -318,22 +306,6 @@ void CALLBACK PrepareScreenUpscale5(const void * pSrcBits, void * pDestBits)
             *pdest2 = color;  pdest2--;
             *pdest3 = 0;  pdest3--;
             *pdest3 = 0;  pdest3--;
-        }
-    }
-}
-
-void CALLBACK PrepareScreen_hq2x_32(const void * pSrcBits, void * pDestBits)
-{
-    hq2x_32((unsigned int *)pSrcBits, (unsigned int *)pDestBits, 640, 288);
-
-    for (int line = 0; line < g_SourceHeight; line++)
-    {
-        DWORD * pLine1 = ((DWORD*)pDestBits) + g_SourceWidth * 2 * (g_SourceHeight * 2 - line - 1);
-        DWORD * pLine2 = ((DWORD*)pDestBits) + g_SourceWidth * 2 * line;
-        for (int i = 0; i < g_SourceWidth * 2; i++)
-        {
-            DWORD tmp = *pLine2;  *pLine2 = *pLine1;  *pLine1 = tmp;
-            pLine1++;  pLine2++;
         }
     }
 }
