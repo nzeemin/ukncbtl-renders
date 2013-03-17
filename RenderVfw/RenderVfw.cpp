@@ -28,6 +28,7 @@ void CALLBACK PrepareScreenUpscale(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale2(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale3(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale4(const void * pSrcBits, void * pDestBits);
+void CALLBACK PrepareScreenUpscale175(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale5(const void * pSrcBits, void * pDestBits);
 
 //Прототип функции преобразования экрана
@@ -42,12 +43,13 @@ struct ScreenModeStruct
 }
 static ScreenModeReference[] = {
     {  640,  288, PrepareScreenCopy,     NULL },  // Dummy record for absent mode 0
-    {  640,  288, PrepareScreenCopy,     _T("640 x 288 Standard") },
-    {  640,  576, PrepareScreenUpscale2, _T("640 x 576 Intrlaced") },
-    {  640,  432, PrepareScreenUpscale,  _T("Upscaled to 1.5") },
-    {  960,  576, PrepareScreenUpscale3, _T("960 x 576 Interlaced") },
-    {  960,  720, PrepareScreenUpscale4, _T("960 x 720, 4:3") },
-    { 1280,  864, PrepareScreenUpscale5, _T("Screen Mode 5") },
+    {  640,  288, PrepareScreenCopy,        _T("640 x 288 Standard") },
+    {  640,  576, PrepareScreenUpscale2,    _T("640 x 576 Intrlaced") },
+    {  640,  432, PrepareScreenUpscale,     _T("Upscaled to 1.5") },
+    {  960,  576, PrepareScreenUpscale3,    _T("960 x 576 Interlaced") },
+    {  960,  720, PrepareScreenUpscale4,    _T("960 x 720, 4:3") },
+    { 1120,  864, PrepareScreenUpscale175,  _T("1120 x 864 Interlaced") },
+    { 1280,  864, PrepareScreenUpscale5,    _T("Screen Mode 5") },
 };
 
 void RenderGetScreenSize(int scrmode, int* pwid, int* phei)
@@ -283,6 +285,33 @@ void CALLBACK PrepareScreenUpscale3(const void * pSrcBits, void * pDestBits)
 
         pdest += 960;
         memset(pdest, 0, 960 * 4);
+    }
+}
+
+// Upscale screen width 640->1120 (x1.75), height 288->864 (x3) with "interlaced" effect
+void CALLBACK PrepareScreenUpscale175(const void * pSrcBits, void * pDestBits)
+{
+    for (int ukncline = g_SourceHeight - 1; ukncline >= 0; ukncline--)
+    {
+        DWORD* psrc = ((DWORD*)pSrcBits) + ukncline * g_SourceWidth;
+        DWORD* pdest1 = ((DWORD*)pDestBits) + ((g_SourceHeight - ukncline - 1) * 3) * 1120;
+        DWORD* pdest2 = pdest1 + 1120;
+        //DWORD* pdest3 = pdest2 + 1120;
+        for (int i = 0; i < g_SourceWidth / 4; i++)
+        {
+            DWORD c1 = *(psrc++);
+            DWORD c2 = *(psrc++);
+            DWORD c3 = *(psrc++);
+            DWORD c4 = *(psrc++);
+
+            *(pdest1++) = *(pdest2++) = c1;
+            *(pdest1++) = *(pdest2++) = AVERAGERGB(c1, c2);
+            *(pdest1++) = *(pdest2++) = c2;
+            *(pdest1++) = *(pdest2++) = AVERAGERGB(c2, c3);
+            *(pdest1++) = *(pdest2++) = c3;
+            *(pdest1++) = *(pdest2++) = AVERAGERGB(c3, c4);
+            *(pdest1++) = *(pdest2++) = c4;
+        }
     }
 }
 
