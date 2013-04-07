@@ -55,7 +55,7 @@ BOOL CALLBACK RenderInit(int width, int height, HWND hwndTarget)
     int iOldFormat = ::GetPixelFormat(hdc);
     if (iOldFormat != iFormat)
         ::SetPixelFormat(hdc, iFormat, &pfd);
-    
+
     g_hRC = wglCreateContext(hdc);
 
     wglMakeCurrent(hdc, g_hRC);
@@ -89,10 +89,10 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
     if (pixels == NULL) return;
 
     wglMakeCurrent(hdc, g_hRC);
-    
+
     RECT rc;  ::GetClientRect(g_hwndScreen, &rc);
     glViewport(0, 0, rc.right, rc.bottom);
-    
+
     bool okOne2One = (rc.right == g_SourceWidth && rc.bottom == g_SourceHeight);
     GLuint texture = 0;
     if (okOne2One)  // 1:1 mode using glDrawPixels
@@ -119,8 +119,8 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexImage2D(GL_TEXTURE_2D, 0, 3, 1024, 512, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
         glTexSubImage2D(GL_TEXTURE_2D, 0,
-            (1024 - g_SourceWidth) / 2, (512 - g_SourceHeight) / 2, g_SourceWidth, g_SourceHeight,
-            GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+                (1024 - g_SourceWidth) / 2, (512 - g_SourceHeight) / 2, g_SourceWidth, g_SourceHeight,
+                GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -128,10 +128,10 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
         float dx = 1024 / ((float)g_SourceWidth);
         float dy = 512 / ((float)g_SourceHeight);
         glBegin(GL_QUADS);
-            glTexCoord2f(0.0f, 1.0f); glVertex3f(-dx, -dy,  1.0f);  // Bottom Left Of The Texture and Quad
-            glTexCoord2f(1.0f, 1.0f); glVertex3f( dx, -dy,  1.0f);  // Bottom Right Of The Texture and Quad
-            glTexCoord2f(1.0f, 0.0f); glVertex3f( dx,  dy,  1.0f);  // Top Right Of The Texture and Quad
-            glTexCoord2f(0.0f, 0.0f); glVertex3f(-dx,  dy,  1.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-dx, -dy,  1.0f);  // Bottom Left Of The Texture and Quad
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( dx, -dy,  1.0f);  // Bottom Right Of The Texture and Quad
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( dx,  dy,  1.0f);  // Top Right Of The Texture and Quad
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-dx,  dy,  1.0f);
         glEnd();
     }
 
@@ -149,18 +149,18 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
 
 // Enable or disable VBlank sync for OpenGL
 void SetVSync(bool sync)
-{	
-	// Function pointer for the wgl extention function we need to enable/disable vsync
-	typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALPROC)( int );
-	PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
+{
+    // Function pointer for the wgl extention function we need to enable/disable vsync
+    typedef BOOL (APIENTRY * PFNWGLSWAPINTERVALPROC)( int );
+    PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
 
-	const char *extensions = (const char*) glGetString(GL_EXTENSIONS);
-	if (strstr(extensions, "WGL_EXT_swap_control") == 0)
-		return;
+    const char *extensions = (const char*) glGetString(GL_EXTENSIONS);
+    if (strstr(extensions, "WGL_EXT_swap_control") == 0)
+        return;
 
     wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
-	if (wglSwapIntervalEXT)
-		wglSwapIntervalEXT(sync);
+    if (wglSwapIntervalEXT)
+        wglSwapIntervalEXT(sync);
 }
 
 //////////////////////////////////////////////////////////////////////

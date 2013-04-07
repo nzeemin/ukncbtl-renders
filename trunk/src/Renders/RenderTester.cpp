@@ -59,8 +59,8 @@ void CreateScreen()
     RECT rc;  ::GetClientRect(g_hWnd, &rc);
 
     g_hwndScreen = CreateWindow(_T("ScreenWindow"), NULL,
-        WS_CHILD | WS_VISIBLE,
-        0, 0, rc.right, rc.bottom, g_hWnd, NULL, hInst, NULL);
+            WS_CHILD | WS_VISIBLE,
+            0, 0, rc.right, rc.bottom, g_hWnd, NULL, hInst, NULL);
 }
 void DestroyScreen()
 {
@@ -100,7 +100,7 @@ BOOL InitRender(LPCTSTR szRenderLibraryName)
     if (g_hModuleRender == NULL)
     {
         AlertWarningFormat(_T("Failed to load render library \"%s\" (0x%08lx)."),
-            szRenderLibraryName, ::GetLastError());
+                szRenderLibraryName, ::GetLastError());
         return FALSE;
     }
 
@@ -154,7 +154,7 @@ BOOL InitRender(LPCTSTR szRenderLibraryName)
     ::DrawMenuBar(g_hWnd);
 
     CreateScreen();
-    
+
     if (!RenderInitProc(SCREEN_WIDTH, SCREEN_HEIGHT, g_hwndScreen))
     {
         AlertWarning(_T("Failed to initialize the render."));
@@ -201,12 +201,12 @@ void UpdateWindowTitle()
 
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPTSTR    lpCmdLine,
-                     int       nCmdShow)
+        HINSTANCE hPrevInstance,
+        LPTSTR    lpCmdLine,
+        int       nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
 
 #ifdef _DEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF);
@@ -214,41 +214,41 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     _CrtSetBreakAlloc(n);
 #endif
 
-	MSG msg;
-	HACCEL hAccelTable;
+    MSG msg;
+    HACCEL hAccelTable;
 
-	// Initialize global strings
-	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_RENDERTESTER, szWindowClass, MAX_LOADSTRING);
-	if (!MyRegisterClass(hInstance))
+    // Initialize global strings
+    LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+    LoadString(hInstance, IDC_RENDERTESTER, szWindowClass, MAX_LOADSTRING);
+    if (!MyRegisterClass(hInstance))
         return FALSE;
 
-	// Perform application initialization:
-	if (!InitInstance (hInstance, nCmdShow))
-		return FALSE;
+    // Perform application initialization:
+    if (!InitInstance (hInstance, nCmdShow))
+        return FALSE;
 
-	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_RENDERTESTER));
+    hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_RENDERTESTER));
 
-	// Main message loop:
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
+    // Main message loop:
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
 
     DoneRender();
 
     ::free(g_Screen);
 
 #ifdef _DEBUG
-        if (_CrtDumpMemoryLeaks())
-            ::MessageBeep(MB_ICONEXCLAMATION);
+    if (_CrtDumpMemoryLeaks())
+        ::MessageBeep(MB_ICONEXCLAMATION);
 #endif
 
-	return (int) msg.wParam;
+    return (int) msg.wParam;
 }
 
 
@@ -268,37 +268,37 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 BOOL MyRegisterClass(HINSTANCE hInstance)
 {
     {
-	    WNDCLASSEX wcex;
-	    wcex.cbSize = sizeof(WNDCLASSEX);
-	    wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	    wcex.lpfnWndProc	= WndProc;
-	    wcex.cbClsExtra		= 0;
-	    wcex.cbWndExtra		= 0;
-	    wcex.hInstance		= hInstance;
-	    wcex.hIcon			= 0; //LoadIcon(hInstance, MAKEINTRESOURCE(IDI_RENDERTESTER));
-	    wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	    wcex.hbrBackground	= (HBRUSH)(COLOR_BTNFACE+1);
-	    wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_RENDERTESTER);
-	    wcex.lpszClassName	= szWindowClass;
-	    wcex.hIconSm		= 0; //LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-    
+        WNDCLASSEX wcex;
+        wcex.cbSize = sizeof(WNDCLASSEX);
+        wcex.style			= CS_HREDRAW | CS_VREDRAW;
+        wcex.lpfnWndProc	= WndProc;
+        wcex.cbClsExtra		= 0;
+        wcex.cbWndExtra		= 0;
+        wcex.hInstance		= hInstance;
+        wcex.hIcon			= 0; //LoadIcon(hInstance, MAKEINTRESOURCE(IDI_RENDERTESTER));
+        wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+        wcex.hbrBackground	= (HBRUSH)(COLOR_BTNFACE + 1);
+        wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_RENDERTESTER);
+        wcex.lpszClassName	= szWindowClass;
+        wcex.hIconSm		= 0; //LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
         if (!RegisterClassEx(&wcex))
             return FALSE;
     }
     {
-	    WNDCLASSEX wcex;
-	    wcex.cbSize = sizeof(WNDCLASSEX);
-	    wcex.style			= CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	    wcex.lpfnWndProc	= ScreenWndProc;
-	    wcex.cbClsExtra		= 0;
-	    wcex.cbWndExtra		= 0;
-	    wcex.hInstance		= hInstance;
-	    wcex.hIcon			= 0;
-	    wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	    wcex.hbrBackground	= NULL;
-	    wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_RENDERTESTER);
-	    wcex.lpszClassName	= _T("ScreenWindow");
-	    wcex.hIconSm		= 0;
+        WNDCLASSEX wcex;
+        wcex.cbSize = sizeof(WNDCLASSEX);
+        wcex.style			= CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+        wcex.lpfnWndProc	= ScreenWndProc;
+        wcex.cbClsExtra		= 0;
+        wcex.cbWndExtra		= 0;
+        wcex.hInstance		= hInstance;
+        wcex.hIcon			= 0;
+        wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+        wcex.hbrBackground	= NULL;
+        wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_RENDERTESTER);
+        wcex.lpszClassName	= _T("ScreenWindow");
+        wcex.hIconSm		= 0;
 
         if (!RegisterClassEx(&wcex))
             return FALSE;
@@ -321,7 +321,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     hInst = hInstance; // Store instance handle in our global variable
 
     g_hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+            CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
     if (!g_hWnd)
         return FALSE;
 
@@ -353,19 +353,19 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
+    int wmId, wmEvent;
 
-	switch (message)
-	{
-	case WM_COMMAND:
-		wmId    = LOWORD(wParam);
-		wmEvent = HIWORD(wParam);
-		// Parse the menu selections:
-		switch (wmId)
-		{
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
+    switch (message)
+    {
+    case WM_COMMAND:
+        wmId    = LOWORD(wParam);
+        wmEvent = HIWORD(wParam);
+        // Parse the menu selections:
+        switch (wmId)
+        {
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
         case ID_FILE_RESIZE1:
             DoCommandResize(640, 288);
             break;
@@ -374,7 +374,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_RENDER_VFW:
             DoCommandSelectRender(_T("RenderVfw.dll"));
-			break;
+            break;
         case ID_RENDER_DX9:
             DoCommandSelectRender(_T("RenderDX9.dll"));
             break;
@@ -387,16 +387,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case ID_RENDER_TESTFPS:
             DoCommandTestFps();
             break;
-		default:
+        default:
             if (wmId >= ID_RENDER_MODE && wmId < ID_RENDER_MODE + 20)
                 DoCommandSelectMode(wmId - ID_RENDER_MODE);
-			else
+            else
                 return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
+        }
+        break;
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
     case WM_SIZE:
         {
             RECT rc;  ::GetClientRect(g_hWnd, &rc);
@@ -405,38 +405,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             UpdateWindowTitle();
         }
         return DefWindowProc(hWnd, message, wParam, lParam);
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	return 0;
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
 }
 
 LRESULT CALLBACK ScreenWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	PAINTSTRUCT ps;
-	HDC hdc;
+    PAINTSTRUCT ps;
+    HDC hdc;
 
-   	switch (message)
-	{
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
+    switch (message)
+    {
+    case WM_PAINT:
+        hdc = BeginPaint(hWnd, &ps);
         if (RenderDrawProc == NULL)
         {
             ::PatBlt(ps.hdc,
-                ps.rcPaint.left, ps.rcPaint.top,
-                ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top,
-                WHITENESS);
+                    ps.rcPaint.left, ps.rcPaint.top,
+                    ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top,
+                    WHITENESS);
         }
         else
         {
             RenderDrawProc(g_Screen, ps.hdc);
         }
-		EndPaint(hWnd, &ps);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	return 0;
+        EndPaint(hWnd, &ps);
+        break;
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
 }
 
 void DoCommandSelectRender(LPCTSTR renderDllName)
@@ -461,7 +461,7 @@ void DoCommandResize(int width, int height)
 {
     int cx = ::GetSystemMetrics(SM_CXFRAME) * 2 + width;
     int cy = ::GetSystemMetrics(SM_CYFRAME) * 2 + height + ::GetSystemMetrics(SM_CYMENU) + ::GetSystemMetrics(SM_CYCAPTION);
-    ::SetWindowPos(g_hWnd, NULL, 0,0, cx, cy, SWP_NOMOVE | SWP_NOZORDER);
+    ::SetWindowPos(g_hWnd, NULL, 0, 0, cx, cy, SWP_NOMOVE | SWP_NOZORDER);
 
     UpdateWindowTitle();
 }
@@ -502,7 +502,7 @@ void DoCommandTestFps()
     float diff = (float)ulDiff;  // number of 100-nanosecond intervals
     TCHAR buffer[100];
     swprintf(buffer, 100, _T("Time spent: %.3f seconds.\nFPS: %.2f"),
-        diff / 10000000.0f, frameCount / (diff / 10000000.0f));
+            diff / 10000000.0f, frameCount / (diff / 10000000.0f));
 
     AlertWarning(buffer);
 }

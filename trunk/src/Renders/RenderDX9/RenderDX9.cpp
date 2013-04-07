@@ -40,7 +40,7 @@ BOOL CALLBACK RenderInit(int width, int height, HWND hwndTarget)
     if (g_pD3D == NULL)
         return FALSE;
 
-    D3DPRESENT_PARAMETERS d3dpp; 
+    D3DPRESENT_PARAMETERS d3dpp;
     ZeroMemory( &d3dpp, sizeof(d3dpp) );
     d3dpp.Windowed = TRUE;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
@@ -48,10 +48,10 @@ BOOL CALLBACK RenderInit(int width, int height, HWND hwndTarget)
     d3dpp.BackBufferCount = 1;
     d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
     d3dpp.hDeviceWindow = g_hwndScreen;
-    
+
     HRESULT hr = g_pD3D->CreateDevice(
-        D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, g_hwndScreen, D3DCREATE_HARDWARE_VERTEXPROCESSING,
-        &d3dpp, &g_direct3dDevice);
+            D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, g_hwndScreen, D3DCREATE_HARDWARE_VERTEXPROCESSING,
+            &d3dpp, &g_direct3dDevice);
     if (FAILED(hr))
         return FALSE;
 
@@ -60,8 +60,8 @@ BOOL CALLBACK RenderInit(int width, int height, HWND hwndTarget)
     g_direct3dDevice->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
 
     hr = g_direct3dDevice->CreateOffscreenPlainSurface(
-        g_SourceWidth, g_SourceHeight, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT,
-        &g_D3DSurface, NULL);
+            g_SourceWidth, g_SourceHeight, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT,
+            &g_D3DSurface, NULL);
     if (FAILED(hr))
         return FALSE;
 
@@ -94,9 +94,9 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
     if (g_direct3dDevice == NULL) return;
 
     HRESULT hr = g_direct3dDevice->Clear(0, NULL,
-        D3DCLEAR_TARGET,
-        D3DCOLOR_XRGB(0,0,0),
-        1.0f, 0);
+            D3DCLEAR_TARGET,
+            D3DCOLOR_XRGB(0, 0, 0),
+            1.0f, 0);
     g_direct3dDevice->BeginScene();
 
     //g_direct3dDevice->SetSamplerState(D3DVERTEXTEXTURESAMPLER0, D3DSAMP_MAXMIPLEVEL, 0);
@@ -121,7 +121,7 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
     srcRect.right = g_SourceWidth;  srcRect.bottom = g_SourceHeight;
     ::GetClientRect(g_hwndScreen, &destRect);
     hr = g_direct3dDevice->StretchRect(g_D3DSurface, &srcRect, backbuffer, NULL,
-        D3DTEXF_LINEAR);
+            D3DTEXF_LINEAR);
 
     g_direct3dDevice->EndScene();
 
