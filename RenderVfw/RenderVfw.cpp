@@ -41,7 +41,8 @@ struct ScreenModeStruct
     PREPARE_SCREEN_CALLBACK callback;
     LPCTSTR description;
 }
-static ScreenModeReference[] = {
+static ScreenModeReference[] =
+{
     {  640,  288, PrepareScreenCopy,     NULL },  // Dummy record for absent mode 0
     {  640,  288, PrepareScreenCopy,        _T("640 x 288 Standard") },
     {  640,  576, PrepareScreenUpscale2,    _T("640 x 576 Intrlaced") },
@@ -89,7 +90,7 @@ void RenderCreateDisplay()
     m_bmpinfo.bmiHeader.biClrImportant = 0;
 
     HDC hdc = GetDC( g_hwndScreen );
-    
+
     m_hbmp = CreateDIBSection( hdc, &m_bmpinfo, DIB_RGB_COLORS, (void **) &m_bits, NULL, 0 );
 
     ReleaseDC( g_hwndScreen, hdc );
@@ -171,10 +172,10 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
     }
 
     DrawDibDraw(m_hdd, hdc,
-        m_xScreenOffset, m_yScreenOffset, -1, -1,
-        &m_bmpinfo.bmiHeader, m_bits,
-        0,0, m_cxScreenWidth, m_cyScreenHeight,
-        0);
+            m_xScreenOffset, m_yScreenOffset, -1, -1,
+            &m_bmpinfo.bmiHeader, m_bits,
+            0, 0, m_cxScreenWidth, m_cyScreenHeight,
+            0);
 }
 
 
