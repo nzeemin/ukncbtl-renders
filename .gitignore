@@ -1,0 +1,11 @@
+/*.ncb
+/Debug
+/*.suo
+/Release
+/RenderDX9/Debug
+/RenderDX9/Release
+/RenderOpenGL/Debug
+/RenderOpenGL/Release
+/RenderVfw/Debug
+/RenderVfw/Release
+*.user

@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderTester-VS2008", "RenderTester-VS2008.vcproj", "{2C80873B-04DA-4438-A5D5-3BEB835A6F58}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderVfw-VS2008", "RenderVfw\RenderVfw-VS2008.vcproj", "{451E4BD1-461C-4A30-8DAF-9F7EC05498D2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderDX9-2008", "RenderDX9\RenderDX9-2008.vcproj", "{049806DE-9954-4D31-A5C7-B47E59502AAA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderOpenGL-VS2008", "RenderOpenGL\RenderOpenGL-VS2008.vcproj", "{EAA60E39-5D83-44F0-B150-9790A839A2E8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C80873B-04DA-4438-A5D5-3BEB835A6F58}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2C80873B-04DA-4438-A5D5-3BEB835A6F58}.Debug|Win32.Build.0 = Debug|Win32
+		{2C80873B-04DA-4438-A5D5-3BEB835A6F58}.Release|Win32.ActiveCfg = Release|Win32
+		{2C80873B-04DA-4438-A5D5-3BEB835A6F58}.Release|Win32.Build.0 = Release|Win32
+		{451E4BD1-461C-4A30-8DAF-9F7EC05498D2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{451E4BD1-461C-4A30-8DAF-9F7EC05498D2}.Debug|Win32.Build.0 = Debug|Win32
+		{451E4BD1-461C-4A30-8DAF-9F7EC05498D2}.Release|Win32.ActiveCfg = Release|Win32
+		{451E4BD1-461C-4A30-8DAF-9F7EC05498D2}.Release|Win32.Build.0 = Release|Win32
+		{049806DE-9954-4D31-A5C7-B47E59502AAA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{049806DE-9954-4D31-A5C7-B47E59502AAA}.Debug|Win32.Build.0 = Debug|Win32
+		{049806DE-9954-4D31-A5C7-B47E59502AAA}.Release|Win32.ActiveCfg = Release|Win32
+		{049806DE-9954-4D31-A5C7-B47E59502AAA}.Release|Win32.Build.0 = Release|Win32
+		{EAA60E39-5D83-44F0-B150-9790A839A2E8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EAA60E39-5D83-44F0-B150-9790A839A2E8}.Debug|Win32.Build.0 = Debug|Win32
+		{EAA60E39-5D83-44F0-B150-9790A839A2E8}.Release|Win32.ActiveCfg = Release|Win32
+		{EAA60E39-5D83-44F0-B150-9790A839A2E8}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
