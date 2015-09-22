@@ -22,6 +22,7 @@ HWND g_hwndScreen = (HWND) INVALID_HANDLE_VALUE;
 
 int g_SourceWidth = 0;
 int g_SourceHeight = 0;
+int m_ScreenMode = 0;
 
 HGLRC g_hRC = NULL;
 
@@ -32,11 +33,12 @@ void SetVSync(bool sync);
 void CALLBACK RenderEnumModes(RENDER_MODE_ENUM_PROC enumProc)
 {
     enumProc(1, _T("Free Scale Mode"), -1, -1);
+    enumProc(2, _T("Fixed aspect ratio 4:3"), -1, -1);
 }
 
 BOOL CALLBACK RenderSelectMode(int newMode)
 {
-    //TODO
+    m_ScreenMode = newMode;
 
     return TRUE;
 }
@@ -101,9 +103,24 @@ void CALLBACK RenderDraw(const void * pixels, HDC hdc)
     wglMakeCurrent(hdc, g_hRC);
 
     RECT rc;  ::GetClientRect(g_hwndScreen, &rc);
-    glViewport(0, 0, rc.right, rc.bottom);
+    int xOffset = 0, yOffset = 0;
+    int cxDestWidth = rc.right, cyDestHeight = rc.bottom;
+    if (m_ScreenMode == 2)  // Fixed aspect ratio 4:3
+    {
+        cxDestWidth = cyDestHeight * 4 / 3;
+        if (cxDestWidth <= rc.right)
+            xOffset = (rc.right - cxDestWidth) / 2;
+        else
+        {
+            cxDestWidth = rc.right;
+            cyDestHeight = cxDestWidth * 3 / 4;
+            yOffset = (rc.bottom - cyDestHeight) / 2;
+        }
+    }
 
-    bool okOne2One = (rc.right == g_SourceWidth && rc.bottom == g_SourceHeight);
+    glViewport(xOffset, yOffset, cxDestWidth, cyDestHeight);
+
+    bool okOne2One = (cxDestWidth == g_SourceWidth && cyDestHeight == g_SourceHeight);
     GLuint texture = 0;
     if (okOne2One)  // 1:1 mode using glDrawPixels
     {
