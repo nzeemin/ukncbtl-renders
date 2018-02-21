@@ -36,6 +36,7 @@ int m_yScreenOffset = 0;
 void CALLBACK PrepareScreenCopy(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale2(const void * pSrcBits, void * pDestBits);
+void CALLBACK PrepareScreenUpscale2d(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale3(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale4(const void * pSrcBits, void * pDestBits);
 void CALLBACK PrepareScreenUpscale175(const void * pSrcBits, void * pDestBits);
@@ -55,7 +56,8 @@ static ScreenModeReference[] =
 {
     {  640,  288, PrepareScreenCopy,     NULL },  // Dummy record for absent mode 0
     {  640,  288, PrepareScreenCopy,        _T("640 x 288 Standard") },
-    {  640,  576, PrepareScreenUpscale2,    _T("640 x 576 Intrlaced") },
+    {  640,  576, PrepareScreenUpscale2,    _T("640 x 576 Interlaced") },
+    {  640,  576, PrepareScreenUpscale2d,   _T("640 x 576 Doubled") },
     {  640,  432, PrepareScreenUpscale,     _T("Upscaled to 1.5") },
     {  960,  576, PrepareScreenUpscale3,    _T("960 x 576 Interlaced") },
     {  960,  720, PrepareScreenUpscale4,    _T("960 x 720, 4:3") },
@@ -242,6 +244,19 @@ void CALLBACK PrepareScreenUpscale2(const void * pSrcBits, void * pDestBits)
 
         pdest += g_SourceWidth;
         memset(pdest, 0, g_SourceWidth * 4);
+    }
+}
+
+void CALLBACK PrepareScreenUpscale2d(const void * pSrcBits, void * pDestBits)
+{
+    for (int ukncline = 0; ukncline < g_SourceHeight; ukncline++)
+    {
+        DWORD* psrc = ((DWORD*)pSrcBits) + ukncline * g_SourceWidth;
+        DWORD* pdest = ((DWORD*)pDestBits) + ((g_SourceHeight - ukncline - 1) * 2) * g_SourceWidth;
+        memcpy(pdest, psrc, g_SourceWidth * 4);
+
+        pdest += g_SourceWidth;
+        memcpy(pdest, psrc, g_SourceWidth * 4);
     }
 }
 
