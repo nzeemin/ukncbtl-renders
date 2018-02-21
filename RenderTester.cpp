@@ -469,8 +469,13 @@ void DoCommandSelectRender(LPCTSTR renderDllName)
 
 void DoCommandResize(int width, int height)
 {
-    int cx = ::GetSystemMetrics(SM_CXFRAME) * 2 + width;
-    int cy = ::GetSystemMetrics(SM_CYFRAME) * 2 + height + ::GetSystemMetrics(SM_CYMENU) + ::GetSystemMetrics(SM_CYCAPTION);
+    RECT rcClient;  ::GetClientRect(g_hWnd, &rcClient);
+    RECT rcWindow;  ::GetWindowRect(g_hWnd, &rcWindow);
+    int cxWindow = rcWindow.right - rcWindow.left;
+    int cyWindow = rcWindow.bottom - rcWindow.top;
+
+    int cx = cxWindow + (width - rcClient.right);
+    int cy = cyWindow + (height - rcClient.bottom);
     ::SetWindowPos(g_hWnd, NULL, 0, 0, cx, cy, SWP_NOMOVE | SWP_NOZORDER);
 
     UpdateWindowTitle();
