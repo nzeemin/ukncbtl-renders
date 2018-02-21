@@ -9,3 +9,5 @@
 /RenderVfw/Debug
 /RenderVfw/Release
 *.user
+/*.sdf
+/*.opensdf
