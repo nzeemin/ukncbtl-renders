@@ -57,12 +57,12 @@ static ScreenModeReference[] =
     {  640,  288, PrepareScreenCopy,     NULL },  // Dummy record for absent mode 0
     {  640,  288, PrepareScreenCopy,        _T("640 x 288 Standard") },
     {  640,  432, PrepareScreenUpscale,     _T("640 x 432 Upscaled to 1.5") },
-    {  640,  576, PrepareScreenUpscale2,    _T("640 x 576 Interlaced") },
+    {  640,  576, PrepareScreenUpscale2,    _T("640 x 576 Scanlined") },
     {  640,  576, PrepareScreenUpscale2d,   _T("640 x 576 Doubled") },
-    {  960,  576, PrepareScreenUpscale3,    _T("960 x 576 Interlaced") },
+    {  960,  576, PrepareScreenUpscale3,    _T("960 x 576 Scanlined") },
     {  960,  720, PrepareScreenUpscale4,    _T("960 x 720, 4:3") },
-    { 1120,  864, PrepareScreenUpscale175,  _T("1120 x 864 Interlaced") },
-    { 1280,  864, PrepareScreenUpscale5,    _T("1280 x 864 Interlaced") },
+    { 1120,  864, PrepareScreenUpscale175,  _T("1120 x 864 Scanlined") },
+    { 1280,  864, PrepareScreenUpscale5,    _T("1280 x 864 Scanlined") },
 };
 
 void RenderGetScreenSize(int scrmode, int* pwid, int* phei)

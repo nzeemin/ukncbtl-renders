@@ -42,6 +42,7 @@ BEGIN
         MENUITEM "Video for Windows",           ID_RENDER_VFW
         MENUITEM "DirectX 9",                   ID_RENDER_DX9
         MENUITEM "OpenGL",                      ID_RENDER_OPENGL
+        MENUITEM "SDL",                         ID_RENDER_SDL
         MENUITEM SEPARATOR
         MENUITEM "Unload",                      ID_RENDER_UNLOAD
     END

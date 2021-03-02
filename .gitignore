@@ -1,6 +1,7 @@
 /*.ncb
-/Debug
 /*.suo
+/ipch
+/Debug
 /Release
 /RenderDX9/Debug
 /RenderDX9/Release
@@ -8,6 +9,9 @@
 /RenderOpenGL/Release
 /RenderVfw/Debug
 /RenderVfw/Release
+/RenderSDL/Debug
+/RenderSDL/Release
+/RenderSDL/SDL2
 *.user
 /*.sdf
 /*.opensdf

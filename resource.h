@@ -12,11 +12,12 @@
 #define ID_RENDER_VFW                   32772
 #define ID_RENDER_DX9                   32773
 #define ID_RENDER_OPENGL                32774
-#define ID_FILE_RESIZE1                 32775
-#define ID_FILE_RESIZE2                 32776
-#define ID_RENDER_UNLOAD                32777
-#define ID_RENDER_TESTFPS               32778
-#define ID_RENDER_MODE                  32779
+#define ID_RENDER_SDL                   32775
+#define ID_FILE_RESIZE1                 32780
+#define ID_FILE_RESIZE2                 32781
+#define ID_RENDER_UNLOAD                32782
+#define ID_RENDER_TESTFPS               32783
+#define ID_RENDER_MODE                  32784
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

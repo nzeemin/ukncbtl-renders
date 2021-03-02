@@ -391,6 +391,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case ID_RENDER_OPENGL:
             DoCommandSelectRender(_T("RenderOpenGL.dll"));
             break;
+        case ID_RENDER_SDL:
+            DoCommandSelectRender(_T("RenderSDL.dll"));
+            break;
         case ID_RENDER_UNLOAD:
             DoCommandSelectRender(NULL);
             break;

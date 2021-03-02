@@ -1,0 +1,8 @@
+LIBRARY	"RenderSDL"
+
+EXPORTS
+	RenderInit
+	RenderDone
+	RenderEnumModes
+	RenderSelectMode
+	RenderDraw
